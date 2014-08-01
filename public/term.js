@@ -2414,10 +2414,19 @@ Terminal.prototype.write = function(data) {
 	{
 	  if (ch === '\\')
 	  {
-	    this.ds = this.params[0];
+	    if (this.params[0][0] == '<')
+	    {
+              this.lines[this.y + this.ybase][this.x] = [this.curAttr, this.params[0]];
+              this.x++;
+              this.updateRange(this.y);
+	    }
+	    else
+	    {
+	      this.ds = this.params[0];
+	      this.handleDs(this.ds);
+	    }
 	    this.currentParam = 0;
 	    this.params = [];
-	    this.handleDs(this.ds);
 	    this.state = normal;
 	  }
 	  else
@@ -2523,18 +2532,18 @@ Terminal.prototype.keyDown = function(ev) {
     // home
     case 36:
       if (this.applicationKeypad) {
-        key = '\x1bOH';
+        key = '\x1b[1~';
         break;
       }
-      key = '\x1bOH';
+      key = '\x1b[1~';
       break;
     // end
     case 35:
       if (this.applicationKeypad) {
-        key = '\x1bOF';
+        key = '\x1b[4~';
         break;
       }
-      key = '\x1bOF';
+      key = '\x1b[4~';
       break;
     // page up
     case 33:
