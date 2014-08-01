@@ -54,7 +54,7 @@ function doUpdate()
 function doCreate()
 {
   var term = pty.spawn(process.env.SHELL || 'bash', [], {
-    name: 'xterm-color',
+    name: 'screen',
     cols: cols,
     rows: rows,
     cwd: process.env.HOME,
