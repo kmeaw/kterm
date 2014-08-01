@@ -1,0 +1,2 @@
+#!/bin/sh
+chromium --incognito --user-data-dir=/tmp/chrome-term --app=http://localhost:3000
