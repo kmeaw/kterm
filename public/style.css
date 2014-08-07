@@ -83,3 +83,7 @@ body, .terminal {
 .bar .status {
   float: right;
 }
+
+.ext {
+  position: absolute;
+}

@@ -2416,7 +2416,7 @@ Terminal.prototype.write = function(data) {
 	  {
 	    if (this.params[0][0] == '<')
 	    {
-              this.lines[this.y + this.ybase][this.x] = [this.curAttr, this.params[0]];
+              this.lines[this.y + this.ybase][this.x] = [this.curAttr, '<div class="ext">' + this.params[0] + '</div>'];
               this.x++;
               this.updateRange(this.y);
 	    }
