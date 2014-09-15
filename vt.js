@@ -281,7 +281,7 @@ module.exports.prototype.ri = function up() // Reverse Index
 
 module.exports.prototype.erase = function se(n)
 {
-  if (n === undefined)
+  if (n === 0)
     n = 1;
   if (n > this.w - this.x)
     n = this.w - this.x;
@@ -294,7 +294,7 @@ module.exports.prototype.erase = function se(n)
 
 module.exports.prototype.shift_ins = function si(n)
 {
-  if (n === undefined)
+  if (n === 0)
     n = 1;
   if (n > this.w - this.x)
     n = this.w - this.x;
@@ -309,7 +309,7 @@ module.exports.prototype.shift_ins = function si(n)
 
 module.exports.prototype.shift_del = function sd(n)
 {
-  if (n === undefined)
+  if (n === 0)
     n = 1;
   if (n > this.w - this.x)
     n = this.w - this.x;
@@ -326,7 +326,7 @@ module.exports.prototype.shift_del = function sd(n)
 
 module.exports.prototype.cud = function cud(n) // Cursor Down
 {
-  if (n === undefined)
+  if (n === 0)
     n = 1;
   this.y += n;
   this.decom_fix();
@@ -335,7 +335,7 @@ module.exports.prototype.cud = function cud(n) // Cursor Down
 
 module.exports.prototype.cuu = function cud(n) // Cursor Up
 {
-  if (n === undefined)
+  if (n === 0)
     n = 1;
   this.y -= n;
   this.decom_fix();
@@ -344,7 +344,7 @@ module.exports.prototype.cuu = function cud(n) // Cursor Up
 
 module.exports.prototype.cuf = function cuf(n) // Cursor Forward
 {
-  if (n === undefined)
+  if (n === 0)
     n = 1;
   this.x += n;
   this.fix();
@@ -353,7 +353,7 @@ module.exports.prototype.cuf = function cuf(n) // Cursor Forward
 
 module.exports.prototype.cub = function cub(n) // Cursor Backward
 {
-  if (n === undefined)
+  if (n === 0)
     n = 1;
   this.x -= n;
   this.fix();

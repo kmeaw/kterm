@@ -14,7 +14,7 @@ module.exports = function Feed(vt)
 module.exports.prototype.initialize = function initialize()
 {
   this.state = NORMAL;
-  this.values = [];
+  this.values = [0];
 };
 
 module.exports.prototype.process = function process(ch)
@@ -32,7 +32,7 @@ module.exports.prototype.process = function process(ch)
             break;
           case "\u009b": // CSI = <ESC> [
             this.state = MODE;
-            this.values = [];
+            this.values = [0];
             break;
           case "\u0000": // <NUL>
           case "\u007f": // <DEL>
@@ -101,7 +101,7 @@ module.exports.prototype.escape = function escape(ch)
       break;
     case "[":
       this.state = MODE;
-      this.values = [];
+      this.values = [0];
       break;
     case "c": // RIS
       this.vt.reset();
@@ -142,7 +142,7 @@ module.exports.prototype.mode = function mode(ch)
     case "0": case "1": case "2": case "3": case "4":
     case "5": case "6": case "7": case "8": case "9":
       this.state = MODE;
-      this.values.push((this.values.pop() || 0) * 10 + parseInt(ch));
+      this.values.push(this.values.pop() * 10 + parseInt(ch));
       break;
     case ";":
       this.state = MODE;
