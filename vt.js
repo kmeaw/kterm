@@ -16,6 +16,7 @@ var SETMODE = {
 
 // Set graphic renition codes:
 var SGR = {
+    0: {bold: false, italic: false, underscore: false, reverse: false, strikethrough: false, fg: null, bg: null},
     1: {bold: true},
     2: {italic: true},
     4: {underscore: true},
@@ -120,17 +121,31 @@ module.exports.prototype.reset = function reset()
 
 module.exports.prototype.select_graphic_rendition = function set_graphic_rendition()
 {
+  var sgr = {};
+  if (this.sgr.bold) sgr.bold = this.sgr.bold;
+  if (this.sgr.italic) sgr.italic = this.sgr.italic;
+  if (this.sgr.underscore) sgr.underscore = this.sgr.underscore;
+  if (this.sgr.reverse) sgr.reverse = this.sgr.reverse;
+  if (this.sgr.strikethrough) sgr.strikethrough = this.sgr.strikethrough;
+  if (this.sgr.fg) sgr.fg = this.sgr.fg;
+  if (this.sgr.bg) sgr.bg = this.sgr.bg;
   for (var i = 0; i < arguments.length; i++)
   {
     var a = arguments[i];
-    if (a == 0)
-      this.sgr = {};
-    else if (SGR[a])
+    if (SGR[a])
     {
       for (var k in SGR[a])
-        this.sgr[k] = SGR[a][k];
+      {
+        if (SGR[a][k])
+          sgr[k] = SGR[a][k];
+        else
+          delete sgr[k];
+      }
     }
+    else
+      console.log("Unknown SGR: %d.", a);
   }
+  this.sgr = sgr;
 };
 
 module.exports.prototype.reset_mode = function set_mode()
@@ -251,10 +266,10 @@ module.exports.prototype.ri = function up() // Reverse Index
 {
   if (this.y == this.margins[0])
   {
-    this.buffer.splice (this.w * margins[1], this.w);
+    this.buffer.splice (this.w * this.margins[1], this.w);
     Array.prototype.splice.apply (this.buffer,
                                   [this.w * this.margins[0], 0].concat(new Array(this.w)));
-    this.abuffer.splice (this.w * margins[1], this.w);
+    this.abuffer.splice (this.w * this.margins[1], this.w);
     Array.prototype.splice.apply (this.abuffer,
                                   [this.w * this.margins[0], 0].concat(new Array(this.w)));
   }
@@ -484,9 +499,9 @@ module.exports.prototype.insert = function insert()
   this.buffer.splice (this.w * this.margins[1], this.w);
   this.abuffer.splice (this.w * this.margins[1], this.w);
   Array.prototype.splice.apply (this.buffer,
-				[this.y * this.w, 0].concat(new Array(this.w)));
+                                [this.y * this.w, 0].concat(new Array(this.w)));
   Array.prototype.splice.apply (this.abuffer,
-				[this.y * this.w, 0].concat(new Array(this.w)));
+                                [this.y * this.w, 0].concat(new Array(this.w)));
   this.cr();
   return this;
 };
@@ -499,9 +514,9 @@ module.exports.prototype.remove = function remove()
   this.buffer.splice (this.w * this.y, this.w);
   this.abuffer.splice (this.w * this.y, this.w);
   Array.prototype.splice.apply (this.buffer,
-				[this.margins[1] * this.w, 0].concat(new Array(this.w)));
+                                [this.margins[1] * this.w, 0].concat(new Array(this.w)));
   Array.prototype.splice.apply (this.abuffer,
-				[this.margins[1] * this.w, 0].concat(new Array(this.w)));
+                                [this.margins[1] * this.w, 0].concat(new Array(this.w)));
   this.abuffer.fill (this.sgr, this.margins[1] * this.w, (this.margins[1] + 1) * this.w);
   this.cr();
   return this;
