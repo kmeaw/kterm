@@ -26,20 +26,21 @@ module.exports.prototype.process = function process(ch)
       if (!this.normal(ch))
       {
         switch (ch) /* Special control characters */
-	{
-	  case "\u001b": // <ESC>
-	    this.state = ESCAPE;
-	    break;
-	  case "\u009b": // CSI = <ESC> [
-	    this.state = MODE;
-	    this.values = [];
-	    break;
-	  case "\u0000": // <NUL>
-	  case "\u007f": // <DEL>
-	    break;
-	  default:
-	    this.vt.print(ch);
-	}
+        {
+          case "\u001b": // <ESC>
+            this.state = ESCAPE;
+            break;
+          case "\u009b": // CSI = <ESC> [
+            this.state = MODE;
+            this.values = [];
+            break;
+          case "\u0000": // <NUL>
+          case "\u007f": // <DEL>
+            break;
+          default:
+	    if (ch.charCodeAt(0) >= 32)
+            this.vt.print(ch); // .charCodeAt(0) < 32 ? '?' : ch);
+        }
       }
       break;
     case ESCAPE:
@@ -61,8 +62,6 @@ module.exports.prototype.process = function process(ch)
       this.state = NORMAL;
       break;
   }
-  if (this.state != NORMAL || prev_state != NORMAL)
-    console.log("%s -> [%s] -> %s", prev_state, ch.charCodeAt(0) < 32 ? ch.charCodeAt(0) : ch, this.state);
 };
 
 module.exports.prototype.normal = function normal(ch)
@@ -183,33 +182,31 @@ module.exports.prototype.mode = function mode(ch)
       this.vt.cup.apply (this.vt, this.values);
       break;
     case "J": // ED
-      var mode = this.values.pop() || 0;
-      switch (mode)
+      switch (this.values.pop() || 0)
       {
         case 0: // from cursor to end
-	  this.vt.range_erase(this.vt.x, this.vt.y);
-	  break;
-	case 1: // from start to cursor
-	  this.vt.range_erase(0, 0, this.vt.x, this.vt.y);
-	  break;
-	case 2: // all
-	  this.vt.range_erase();
-	  break;
+          this.vt.range_erase(this.vt.x, this.vt.y);
+          break;
+        case 1: // from start to cursor
+          this.vt.range_erase(0, 0, this.vt.x, this.vt.y);
+          break;
+        case 2: // all
+          this.vt.range_erase();
+          break;
       }
       break;
     case "K": // EL
-      var mode = this.values.pop() || 0;
-      switch (mode)
+      switch (this.values.pop() || 0)
       {
         case 0: // from cursor to end
-	  this.vt.range_erase(this.vt.x, this.vt.y, this.vt.w - 1, this.vt.y);
-	  break;
-	case 1: // from start to cursor
-	  this.vt.range_erase(0, this.vt.y, this.vt.x, this.vt.y);
-	  break;
-	case 2: // entire line
-	  this.vt.range_erase(0, this.vt.y, this.vt.w - 1, this.vt.y);
-	  break;
+          this.vt.range_erase(this.vt.x, this.vt.y, this.vt.w - 1, this.vt.y);
+          break;
+        case 1: // from start to cursor
+          this.vt.range_erase(0, this.vt.y, this.vt.x, this.vt.y);
+          break;
+        case 2: // entire line
+          this.vt.range_erase(0, this.vt.y, this.vt.w - 1, this.vt.y);
+          break;
       }
       break;
     case "L": // IL
@@ -244,6 +241,8 @@ module.exports.prototype.mode = function mode(ch)
       this.vt.reset_mode.apply (this.vt, this.values);
       break;
     case "m": // SGR
+      if (this.values.length === 0)
+        this.values.push(0);
       this.vt.select_graphic_rendition.apply (this.vt, this.values);
       break;
     case "r": // DECSTBM
@@ -259,11 +258,13 @@ module.exports.prototype.mode = function mode(ch)
     case "?": // private flag
       this.state = MODE;
       this.values.push("private");
+      break;
     case "\u0018": // CAN
     case "\u0019": // SUB
+      return this.normal(ch);
     default:
       if (!this.normal(ch))
-	return false;
+        return false;
       break;
   }
 
