@@ -17,7 +17,35 @@ module.exports.prototype.initialize = function initialize()
   this.values = [0];
 };
 
-module.exports.prototype.process = function process(ch)
+module.exports.prototype.process = function process(s)
+{
+  var ctrl = -1;
+  for(var i = 0; i < s.length; i++)
+  {
+    if (this.state == NORMAL)
+    {
+      if (ctrl < i)
+      {
+        ctrl = s.substr(i).search(/[\u0000-\u001f\u007f\u009b]/);
+	if (ctrl == -1)
+	  ctrl = s.length;
+	else
+	  ctrl = ctrl + i;
+      }
+      if (i != ctrl - 1 && ctrl > i)
+      {
+        this.vt.print(s.substring(i, ctrl));
+        i = ctrl - 1;
+      }
+      else
+        this.process_char(s[i]);
+    }
+    else
+      this.process_char(s[i]);
+  }
+};
+
+module.exports.prototype.process_char = function process_char(ch)
 {
   var prev_state = this.state;
   switch (this.state)
