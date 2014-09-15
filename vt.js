@@ -218,8 +218,11 @@ module.exports.prototype.resize = function resize(w,h)
   delete this.modes.DECOM;
 };
 
-module.exports.prototype.print = function print(ch)
+module.exports.prototype.print = function print(str)
 {
+  for (var i = 0; i < str.length; i++)
+  {
+
   // Auto-wrap
   if (this.x == this.w)
   {
@@ -233,10 +236,12 @@ module.exports.prototype.print = function print(ch)
   if (this.modes.IRM)
     this.insert();
 
-  this.buffer[this.y * this.w + this.x] = ch;
+  this.buffer[this.y * this.w + this.x] = str[i];
   this.abuffer[this.y * this.w + this.x] = this.sgr;
 
   this.x += 1;
+
+  }
 };
 
 module.exports.prototype.cr = function cr()
@@ -257,7 +262,7 @@ module.exports.prototype.ind = function down() // Index
                                   [this.w * this.margins[1], 0].concat(new Array(this.w)));
   }
   else
-    this.cud();
+    this.cud(1);
 
   return this;
 };
@@ -274,7 +279,7 @@ module.exports.prototype.ri = function up() // Reverse Index
                                   [this.w * this.margins[0], 0].concat(new Array(this.w)));
   }
   else
-    this.cup();
+    this.cup(1);
 
   return this;
 };
