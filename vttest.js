@@ -1,8 +1,8 @@
 var pty = require('pty.js');
 var VT = require('./vt');
 var Feed = require('./feed');
-var vt = new VT(80,35);
-var term = pty.spawn('htop', [], {
+var vt = new VT(80,25);
+var term = pty.spawn('dmesg', [], {
   name: 'screen',
   cols: vt.w,
   rows: vt.h,
@@ -28,12 +28,14 @@ var colors = [
         'white' ];
 
 
-setTimeout(function() { term.write("q\n") }, 2000);
+//setTimeout(function() { term.write("q\n") }, 2000);
 term.on('exit', function() {
-  console.log("Processing...");
-  buffer.split("").forEach(function(ch) {
-    feed.process(ch);
-  });
+  console.log("Processing %dk...", parseInt(buffer.length >> 10));
+  var t = process.hrtime();
+  feed.process(buffer);
+  var diff = process.hrtime(t);
+  console.log(diff[0] + diff[1] * 1e-9);
+  //buffer.split('').forEach(function(x) { feed.process(x) });
   console.log("VT output:");
   for(var y = 0; y < vt.h; y++)
   {
