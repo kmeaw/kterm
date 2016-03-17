@@ -3,7 +3,8 @@ var NORMAL = 0,
     ESCAPE = 1,
     MODE = 2,
     DECSHARP = 3,
-    IGNORE = 4;
+    IGNORE = 4,
+    OSC = 5;
 
 module.exports = function Feed(vt)
 {
@@ -43,6 +44,12 @@ module.exports.prototype.process = function process(s)
     else
       this.process_char(s[i]);
   }
+};
+
+module.exports.prototype.osc = function osc(ch)
+{
+  var code = ch.charCodeAt(0);
+  return (code >= 0x20 && code != 0x9C) || (code >= 0x08 && code <= 0x0D);
 };
 
 module.exports.prototype.process_char = function process_char(ch)
@@ -86,6 +93,10 @@ module.exports.prototype.process_char = function process_char(ch)
         this.initialize();
       this.state = NORMAL;
       break;
+    case OSC:
+      if (!this.osc(ch))
+        this.state = NORMAL;
+      break;
     case IGNORE:
       this.state = NORMAL;
       break;
@@ -127,6 +138,9 @@ module.exports.prototype.escape = function escape(ch)
     case "#":
       this.state = DECSHARP;
       break;
+    case "]":
+      this.state = OSC;
+      break;
     case "[":
       this.state = MODE;
       this.values = [0];
@@ -153,6 +167,10 @@ module.exports.prototype.escape = function escape(ch)
       this.vt.pop();
       break;
     case "\u001b":
+      this.state = IGNORE;
+      break;
+    case "(": // G0
+    case ")": // G1
       this.state = IGNORE;
       break;
     default:

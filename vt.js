@@ -188,7 +188,7 @@ module.exports.prototype.resize = function resize(w,h)
       Array.prototype.splice.apply (this.abuffer,
                                     [this.w + w * y, 0].concat(new Array(w - this.w)));
     }
-    for (var x = parseInt(this.w / 7) * 7 + 7; x < w; w += 8)
+    for (var x = parseInt(this.w / 7) * 7 + 7; x < w; x += 8)
       if (this.tabs.indexOf(x) == -1)
         this.tabs.push (x);
   }
@@ -252,7 +252,7 @@ module.exports.prototype.cr = function cr()
 
 module.exports.prototype.ind = function down() // Index
 {
-  if (this.y == this.margins[1])
+  if (this.y >= this.margins[1])
   {
     this.buffer.splice (this.w * this.margins[0], this.w);
     Array.prototype.splice.apply (this.buffer,
