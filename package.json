@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "local terminal desktop",
   "dependencies": {
-    "express": "^4.7.2",
-    "socket.io": "^1.0.6",
-    "pty.js" : "^0.2.4"
+    "express": "^4.13.4",
+    "socket.io": "^1.4.5",
+    "pty.js" : "^0.3.0"
   }
 }

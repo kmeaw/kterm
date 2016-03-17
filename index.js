@@ -2,41 +2,39 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var pty = require('pty.js');
-var path = require('path');
+var Window = require('./window');
 
 var cols = 80, rows = 24;
-
+Error.stackTraceLimit = Infinity;
 app.use(express.static(__dirname + '/public'));
 
-var terms = {};
-var termmap = [];
-var ds = {};
-var titles = {};
+var windows = {};
 
 process.env.KTY = module.id;
 
 io.on('connection', function(socket){
   doUpdate();
   socket.on('data', function(key, data) {
-    if (key in terms)
-      terms[key].write(data);
+    if (key in windows)
+      windows[key].pty.write(data);
   });
   socket.on('set title', function(key, data) {
-    titles[key] = data;
+    if (key in window)
+      windows[key].title = data;
   });
   socket.on('set ds', function(key, data) {
-    ds[key] = data;
+    if (key in window)
+      windows[key].ds = data;
   });
   socket.on('resize', function(width, height) {
     cols = width;
     rows = height;
-    for(var k in terms)
+    for(var k in windows)
     {
       try {
-        terms[k].resize(width, height);
+        windows[k].pty.resize(width, height);
       } catch(e) {
-        terms[k].emit('exit');
+        windows[k].pty.emit('exit');
       }
     }
   });
@@ -48,48 +46,31 @@ io.on('connection', function(socket){
 
 function doUpdate()
 {
-  io.emit("sync", {termmap:termmap, ds:ds, titles:titles});
+  io.emit("sync", {windows: Object.keys(windows).map(function(wk) {
+    return windows[wk].serialize();
+  })});
 }
 
 function doCreate()
 {
-  var term = pty.spawn(process.env.SHELL || 'bash', [], {
-    name: 'screen',
-    cols: cols,
-    rows: rows,
-    cwd: process.env.HOME,
-    env: process.env
-  });
+  var window = new Window(cols, rows);
 
   var idx = 0;
-  while (idx in terms)
+  while (idx in windows)
     idx++;
 
-  term.on('data', function(data) {
+  window.pty.on('data', function(data) {
     io.emit('data', idx, data);
   });
 
-  term.on('exit', function() {
-    var i = termmap.indexOf(idx);
-    termmap.splice(i, 1);
-    delete terms[idx];
-    delete titles[idx];
-    delete ds[idx];
-    if (terms.length === 0)
+  window.pty.on('exit', function() {
+    delete windows[idx];
+    if (Object.keys(windows).length === 0)
       doCreate();
     doUpdate();
   });
 
-  var i = 0;
-  while (i < termmap.length)
-    if (termmap[i] > idx)
-      break;
-    else
-      i++;
-  termmap.splice(i, 0, idx);
-  terms[idx] = term;
-  ds[idx] = path.basename(process.env.SHELL || 'bash');
-  titles[idx] = ds[idx];
+  windows[idx] = window;
   active = idx;
 
   return idx;
@@ -98,8 +79,8 @@ function doCreate()
 doCreate();
 
 process.once("SIGINT", function() {
-  for(var k in terms)
-    terms[k].kill();
+  for(var k in windows)
+    windows[k].pty.kill();
   io.eio.close();
   http.close();
 });

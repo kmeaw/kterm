@@ -16,7 +16,9 @@ jQuery(function($) {
       for(var k in terms)
         if (options.termmap.indexOf(parseInt(k)) == -1)
 	  doStop(k);
-      options.termmap.forEach(function(k) {
+      var termmap = Object.keys(options.windows);
+      termmap = termmap.map(function(x) { return parseInt(x) }).sort();
+      termmap.forEach(function(k) {
         if (!(k in terms))
 	{
 	  doStart(k);
