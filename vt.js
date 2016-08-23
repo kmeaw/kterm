@@ -486,7 +486,7 @@ module.exports.prototype.pop = function pop()
         this[k] = s[k];
     }
 
-    this.up(0);
+    this.cup(0);
   }
   else
   {
