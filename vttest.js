@@ -2,7 +2,7 @@ var pty = require('pty.js');
 var VT = require('./vt');
 var Feed = require('./feed');
 var vt = new VT(80,25);
-var term = pty.spawn('dmesg', [], {
+var term = pty.spawn('dialog', ['--timeout', '1', '--msgbox', 'Hello', '10', '10'], {
   name: 'screen',
   cols: vt.w,
   rows: vt.h,
