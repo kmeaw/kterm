@@ -1,20 +1,24 @@
 var terms = {};
-var termmap = [];
 var active = null;
 var prev = null;
-var titles = {};
-var ds = {};
 var activate = true;
+var windows = {};
 
 var rows = 24;
 var cols = 80;
+
+try {
+  document.body.webkitRequestFullScreen();
+} catch(e) {
+  console.log('Cannot request fullscreen: ', e);
+}
 
 jQuery(function($) {
   socket = io.connect();
   socket.on("connect", function() {
     socket.on("sync", function(options) {
       for(var k in terms)
-        if (options.termmap.indexOf(parseInt(k)) == -1)
+        if (!(k in options.windows))
 	  doStop(k);
       var termmap = Object.keys(options.windows);
       termmap = termmap.map(function(x) { return parseInt(x) }).sort();
@@ -29,9 +33,7 @@ jQuery(function($) {
 	  }
 	}
       });
-      termmap = options.termmap;
-      ds = options.ds;
-      titles = options.titles;
+      windows = options.windows;
       if (active === null || !(active in terms))
         doSet(termmap[0]);
       updateBar();
@@ -41,11 +43,12 @@ jQuery(function($) {
     var $bar = $(".bar");
     function updateBar()
     {
+      var termmap = Object.keys(windows);
       $bar.empty();
       var $ol = $("<ol />");
       $bar.append($ol);
       termmap.forEach(function(k) {
-        var t = ds[k];
+        var t = windows[k].ds;
 	var $li = $("<li />").text(t).attr("value", k);
 	$li.click(function() {
 	  doSet(k);
@@ -91,10 +94,12 @@ jQuery(function($) {
 	  doSet(key);
       });
       term.on("request term previous", function() {
+        var termmap = Object.keys(windows);
 	var idx = termmap.indexOf(active);
 	doSet(termmap[(termmap.length + idx - 1) % termmap.length]);
       });
       term.on("request term next", function() {
+        var termmap = Object.keys(windows);
 	var idx = termmap.indexOf(active);
 	doSet(termmap[(idx + 1) % termmap.length]);
       });
@@ -104,12 +109,12 @@ jQuery(function($) {
       });
       term.on("title", function(title) {
 	socket.emit("set title", key, title);
-	titles[key] = title;
+	windows[key].title = title;
 	updateBar();
       });
       term.on("ds", function(dsi) {
         socket.emit("set ds", key, dsi);
-	ds[key] = dsi;
+	windows[key].ds = dsi;
 	updateBar();
       });
       var $e = $("<div />").attr("id", "t" + key).addClass("term").hide();
@@ -128,8 +133,7 @@ jQuery(function($) {
       term.destroy();
       $e.remove();
       delete terms[key];
-      delete titles[key];
-      delete ds[key];
+      delete windows[key];
     }
     function doSet(key)
     {

@@ -1,4 +1,4 @@
-var pty = require('pty.js');
+var pty = require('node-pty');
 var VT = require('./vt');
 var Feed = require('./feed');
 var vt = new VT(80,25);

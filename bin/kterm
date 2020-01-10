@@ -1,2 +1,7 @@
 #!/bin/sh
-chromium --incognito --user-data-dir=/tmp/chrome-term --app=http://localhost:3000
+for browser in chromium yandex-browser-beta yandex-browser; do
+    if which browser > /dev/null 2> /dev/null; then
+        exec $browser --incognito --kiosk --user-data-dir=/tmp/chrome-term --app=http://localhost:3000
+    fi
+done
+echo "$0: no web browser found." >&2

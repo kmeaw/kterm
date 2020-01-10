@@ -19,11 +19,11 @@ io.on('connection', function(socket){
       windows[key].pty.write(data);
   });
   socket.on('set title', function(key, data) {
-    if (key in window)
+    if (key in windows)
       windows[key].title = data;
   });
   socket.on('set ds', function(key, data) {
-    if (key in window)
+    if (key in windows)
       windows[key].ds = data;
   });
   socket.on('resize', function(width, height) {

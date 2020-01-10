@@ -1,4 +1,4 @@
-var pty = require('pty.js');
+var pty = require('node-pty');
 var path = require('path');
 var VT = require('./vt');
 var Feed = require('./feed');
